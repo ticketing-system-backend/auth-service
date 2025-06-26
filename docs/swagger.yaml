@@ -1,0 +1,408 @@
+definitions:
+  controller.CreateRoleRequest:
+    properties:
+      deskripsi:
+        type: string
+      level:
+        type: string
+      nama:
+        type: string
+    required:
+    - deskripsi
+    - level
+    - nama
+    type: object
+  controller.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      nama_lengkap:
+        type: string
+      password:
+        type: string
+      role_ids:
+        items:
+          type: integer
+        type: array
+    required:
+    - email
+    - nama_lengkap
+    - password
+    - role_ids
+    type: object
+  controller.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  controller.LoginResponse:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+      token:
+        type: string
+      user: {}
+    type: object
+  controller.RoleResponse:
+    properties:
+      data:
+        $ref: '#/definitions/model.Role'
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  controller.UpdateRoleRequest:
+    properties:
+      deskripsi:
+        type: string
+      level:
+        type: string
+      nama:
+        type: string
+    required:
+    - deskripsi
+    - level
+    - nama
+    type: object
+  controller.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      nama_lengkap:
+        type: string
+      password:
+        type: string
+      role_ids:
+        items:
+          type: integer
+        type: array
+    required:
+    - email
+    - nama_lengkap
+    - role_ids
+    type: object
+  controller.UserResponse:
+    properties:
+      data:
+        $ref: '#/definitions/model.User'
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  model.Role:
+    properties:
+      created_at:
+        type: string
+      deskripsi:
+        type: string
+      id:
+        type: integer
+      level:
+        type: string
+      nama:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      nama_lengkap:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/model.Role'
+        type: array
+      updated_at:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: A rest API in Go using Gin framework
+  title: Go Gin Rest API
+  version: "1.0"
+paths:
+  /login/dashboard:
+    post:
+      consumes:
+      - application/json
+      description: Login khusus dashboard untuk semua role KECUALI customer
+      parameters:
+      - description: Login data
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/controller.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login dashboard
+      tags:
+      - Auth
+  /login/mobile:
+    post:
+      consumes:
+      - application/json
+      description: Login untuk semua role (termasuk customer)
+      parameters:
+      - description: Login data
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/controller.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login mobile
+      tags:
+      - Auth
+  /roles:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.RoleResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all Role
+      tags:
+      - Role
+    post:
+      parameters:
+      - description: Create role data
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateRoleRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.RoleResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Role
+      tags:
+      - Role
+  /roles/{id}:
+    get:
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.RoleResponse'
+      security:
+      - BearerAuth: []
+      summary: Get role by ID
+      tags:
+      - Role
+    put:
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update role data
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/controller.UpdateRoleRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.RoleResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Role
+      tags:
+      - Role
+  /users:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all User
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create user
+      tags:
+      - User
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/controller.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - User
+securityDefinitions:
+  BearerAuth:
+    description: Enter your bearer token in the format **Bearer &lt;token&gt;**
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
